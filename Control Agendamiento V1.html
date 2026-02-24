@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIMMAN — Gestión de Servicios</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --bg2: #ffffff;
+  --bg3: #eeecea;
+  --bg4: #e8e6e1;
+  --border: #dedad4;
+  --border2: #ccc9c2;
+  --accent: #1a56db;
+  --accent-light: #e8f0fe;
+  --accent2: #0d9488;
+  --accent2-light: #e0f7f4;
+  --accent3: #d97706;
+  --accent3-light: #fef3c7;
+  --accent4: #dc2626;
+  --accent4-light: #fee2e2;
+  --accent5: #7c3aed;
+  --accent5-light: #ede9fe;
+  --text: #1c1917;
+  --text2: #57534e;
+  --text3: #a8a29e;
+  --text4: #d6d3d1;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.08);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --sidebar-w: 248px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ─── SIDEBAR ─── */
+.sidebar{
+  width:var(--sidebar-w);min-height:100vh;background:var(--text);
+  position:fixed;top:0;left:0;z-index:200;display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.logo-area{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
+.logo-brand{font-family:'Fraunces',serif;font-size:24px;font-weight:700;color:#fff;letter-spacing:-.5px;}
+.logo-tagline{font-size:10.5px;color:rgba(255,255,255,.45);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px;}
+
+.nav-group{padding:16px 12px 6px;}
+.nav-label{font-size:9.5px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;font-weight:600;padding:0 8px;margin-bottom:4px;}
+.nav-link{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;
+  color:rgba(255,255,255,.6);font-size:13.5px;font-weight:500;cursor:pointer;
+  transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left;
+}
+.nav-link:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);}
+.nav-link.active{background:rgba(255,255,255,.15);color:#fff;}
+.nav-link svg{width:17px;height:17px;flex-shrink:0;opacity:.8;}
+.nav-link.active svg{opacity:1;}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;}
+
+.sidebar-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid rgba(255,255,255,.08);}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer;}
+.user-row:hover{background:rgba(255,255,255,.07);}
+.av{display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:700;color:#fff;flex-shrink:0;}
+.av-sm{width:28px;height:28px;border-radius:6px;font-size:11px;}
+.av-md{width:36px;height:36px;border-radius:9px;font-size:13px;}
+.av-lg{width:48px;height:48px;border-radius:12px;font-size:17px;}
+.av-xl{width:56px;height:56px;border-radius:14px;font-size:20px;}
+.user-info .uname{font-size:13px;font-weight:600;color:#fff;}
+.user-info .urole{font-size:11px;color:rgba(255,255,255,.4);}
+
+/* ─── TOPBAR ─── */
+.topbar{
+  position:fixed;top:0;left:var(--sidebar-w);right:0;height:58px;
+  background:rgba(245,244,240,.9);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);z-index:100;
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;}
+.bc-item{color:var(--text3);cursor:pointer;transition:color .15s;}
+.bc-item:hover{color:var(--accent);}
+.bc-sep{color:var(--text4);}
+.bc-current{color:var(--text);font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+
+/* ─── MAIN ─── */
+.main{margin-left:var(--sidebar-w);padding-top:96px;min-height:100vh;}
+.page{padding:28px;display:none;animation:fadeUp .22s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ─── CARDS ─── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.card-p{padding:22px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.card-title{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text);}
+.card-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+
+/* ─── STATS GRID ─── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+.stat-card.blue::before{background:var(--accent);}
+.stat-card.teal::before{background:var(--accent2);}
+.stat-card.amber::before{background:var(--accent3);}
+.stat-card.red::before{background:var(--accent4);}
+.stat-card.purple::before{background:var(--accent5);}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:10px;}
+.stat-val{font-family:'Fraunces',serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:5px;}
+.stat-trend{font-size:12px;color:var(--text3);}
+.stat-trend.up{color:var(--accent2);}
+.stat-trend.down{color:var(--accent4);}
+
+/* ─── BADGES ─── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;}
+.badge.dot::before{content:'';width:6px;height:6px;border-radius:50%;}
+.b-blue{background:var(--accent-light);color:var(--accent);}
+.b-blue.dot::before{background:var(--accent);}
+.b-teal{background:var(--accent2-light);color:var(--accent2);}
+.b-teal.dot::before{background:var(--accent2);}
+.b-amber{background:var(--accent3-light);color:var(--accent3);}
+.b-amber.dot::before{background:var(--accent3);}
+.b-red{background:var(--accent4-light);color:var(--accent4);}
+.b-red.dot::before{background:var(--accent4);}
+.b-purple{background:var(--accent5-light);color:var(--accent5);}
+.b-purple.dot::before{background:var(--accent5);}
+.b-gray{background:var(--bg3);color:var(--text2);}
+.b-gray.dot::before{background:var(--text3);}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Outfit',sans-serif;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#1447c0;}
+.btn-secondary{background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--bg4);color:var(--text);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg3);color:var(--text);}
+.btn-danger{background:var(--accent4-light);color:var(--accent4);}
+.btn-danger:hover{background:#fca5a5;color:#991b1b;}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:7px;}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:6px;}
+.btn-back{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--radius-sm);background:var(--bg3);color:var(--text2);border:1px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;margin-bottom:20px;}
+.btn-back:hover{background:var(--bg4);color:var(--text);}
+.btn-back svg{width:15px;height:15px;}
+
+/* ─── TABLE ─── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius-sm);}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--bg3);color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;padding:10px 16px;text-align:left;white-space:nowrap;}
+thead th:first-child{border-radius:var(--radius-sm) 0 0 0;}
+thead th:last-child{border-radius:0 var(--radius-sm) 0 0;}
+td{padding:13px 16px;font-size:13.5px;border-bottom:1px solid var(--bg3);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg3);}
+
+/* ─── PROGRESS ─── */
+.prog-wrap{display:flex;align-items:center;gap:9px;}
+.prog-bar{flex:1;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;min-width:80px;}
+.prog-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.prog-label{font-size:12px;color:var(--text2);white-space:nowrap;font-weight:600;min-width:36px;}
+
+/* ─── RADIAL GAUGE ─── */
+.gauge-wrap{position:relative;width:90px;height:90px;flex-shrink:0;}
+.gauge-svg{width:90px;height:90px;transform:rotate(-90deg);}
+.gauge-track{fill:none;stroke:var(--bg3);stroke-width:8;}
+.gauge-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);}
+.gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.gauge-pct{font-family:'Fraunces',serif;font-size:16px;font-weight:700;line-height:1;}
+.gauge-pct-label{font-size:9px;color:var(--text3);font-weight:600;}
+
+/* ─── HOURS BREAKDOWN ─── */
+.hours-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.hour-chip{background:var(--bg3);border-radius:10px;padding:12px;text-align:center;}
+.hour-chip.warning{background:var(--accent3-light);}
+.hour-chip.danger{background:var(--accent4-light);}
+.hour-chip.success{background:var(--accent2-light);}
+.hc-val{font-family:'Fraunces',serif;font-size:20px;font-weight:700;line-height:1;}
+.hc-label{font-size:10px;color:var(--text3);margin-top:3px;font-weight:600;}
+.hour-chip.warning .hc-val{color:var(--accent3);}
+.hour-chip.warning .hc-label{color:var(--accent3);}
+.hour-chip.danger .hc-val{color:var(--accent4);}
+.hour-chip.danger .hc-label{color:var(--accent4);}
+.hour-chip.success .hc-val{color:var(--accent2);}
+.hour-chip.success .hc-label{color:var(--accent2);}
+
+/* ─── FORMS ─── */
+.form-group{margin-bottom:15px;}
+.form-label{font-size:12px;color:var(--text2);font-weight:600;margin-bottom:6px;display:block;letter-spacing:.2px;}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13.5px;outline:none;transition:border-color .15s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);background:#fff;}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;}
+
+/* ─── MODAL ─── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:18px;padding:28px;width:580px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .2s ease;}
+.modal-lg{width:720px;}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.modal-title{font-family:'Fraunces',serif;font-size:19px;font-weight:700;}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--bg3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:18px;transition:all .15s;}
+.modal-close:hover{background:var(--bg4);color:var(--text);}
+.modal-ft{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:20px;border-top:1.5px solid var(--border);}
+
+/* ─── SCHEDULE ─── */
+.sched-outer{overflow-x:auto;border-radius:var(--radius-sm);}
+.sched-table{border-collapse:collapse;min-width:900px;width:100%;}
+.sched-table th{background:var(--bg3);padding:10px 8px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;text-align:center;border-right:1px solid var(--border);white-space:nowrap;}
+.sched-table th:first-child{text-align:left;padding-left:14px;width:72px;}
+.sched-table td{padding:4px;height:52px;border-right:1px solid var(--bg3);border-bottom:1px solid var(--bg3);vertical-align:top;}
+.sched-table td.time-col{background:var(--bg3);font-size:12px;color:var(--text3);font-weight:600;padding:8px 10px;text-align:center;vertical-align:middle;}
+.sched-event{border-radius:8px;padding:5px 8px;font-size:11px;cursor:pointer;transition:filter .15s;height:44px;overflow:hidden;}
+.sched-event:hover{filter:brightness(.95);}
+.sev-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sev-time{opacity:.7;font-size:10px;margin-top:1px;}
+.sev-blue{background:var(--accent-light);color:var(--accent);border-left:3px solid var(--accent);}
+.sev-teal{background:var(--accent2-light);color:var(--accent2);border-left:3px solid var(--accent2);}
+.sev-amber{background:var(--accent3-light);color:var(--accent3);border-left:3px solid var(--accent3);}
+.sev-red{background:var(--accent4-light);color:var(--accent4);border-left:3px solid var(--accent4);}
+
+/* ─── CALENDAR ─── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cal-day-lbl{text-align:center;font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:6px 0;}
+.cal-day{min-height:90px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:8px;cursor:pointer;transition:all .15s;}
+.cal-day:hover{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
+.cal-day.today{border-color:var(--accent);background:var(--accent-light);}
+.cal-day.other-month{opacity:.4;}
+.cal-day.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.25);}
+.cdn{font-size:13px;font-weight:700;margin-bottom:5px;}
+.cal-day.today .cdn{color:var(--accent);}
+.cal-ev{font-size:10px;border-radius:4px;padding:2px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ─── WORKER CARD ─── */
+.worker-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;box-shadow:var(--shadow);transition:all .2s;cursor:pointer;}
+.worker-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.wc-top{height:6px;}
+.wc-body{padding:20px;}
+.wc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+
+/* ─── LAYOUT HELPERS ─── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;}
+.sidebar-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;}
+.flex{display:flex;}
+.flex-c{display:flex;align-items:center;}
+.flex-bc{display:flex;align-items:center;justify-content:space-between;}
+.gap-6{gap:6px;}
+.gap-8{gap:8px;}
+.gap-10{gap:10px;}
+.gap-12{gap:12px;}
+.gap-16{gap:16px;}
+.mb-6{margin-bottom:6px;}
+.mb-10{margin-bottom:10px;}
+.mb-14{margin-bottom:14px;}
+.mb-18{margin-bottom:18px;}
+.mb-22{margin-bottom:22px;}
+.mt-6{margin-top:6px;}
+.mt-10{margin-top:10px;}
+.mt-14{margin-top:14px;}
+.mt-18{margin-top:18px;}
+.t2{color:var(--text2);}
+.t3{color:var(--text3);}
+.fs-12{font-size:12px;}
+.fs-13{font-size:13px;}
+.fw-6{font-weight:600;}
+.fw-7{font-weight:700;}
+.serif{font-family:'Fraunces',serif;}
+
+/* ─── TABS ─── */
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px;}
+.tab{padding:9px 16px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;border-radius:4px 4px 0 0;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;animation:fadeUp .18s ease;}
+
+/* ─── ACTIVITY ─── */
+.activity-bar{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);margin-bottom:20px;}
+.act-cell{background:var(--bg3);padding:14px 8px;text-align:center;}
+.act-val{font-family:'Fraunces',serif;font-size:22px;font-weight:700;}
+.act-lbl{font-size:10px;color:var(--text3);font-weight:600;margin-top:2px;}
+
+/* ─── SEARCH ─── */
+.search-box{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:7px 12px;}
+.search-box input{background:none;border:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:13.5px;outline:none;flex:1;}
+.search-box input::placeholder{color:var(--text3);}
+
+/* ─── CHIPS ─── */
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1.5px solid var(--border);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text2);}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+.chip.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+
+/* ─── PLAN PROGRESS ─── */
+.plan-box{background:var(--bg3);border-radius:10px;padding:14px 16px;}
+.plan-name{font-weight:700;font-size:14px;margin-bottom:3px;}
+.plan-meta{font-size:12px;color:var(--text3);margin-bottom:12px;}
+
+/* ─── NOTIFICATION FEED ─── */
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--bg3);}
+.notif-item:last-child{border-bottom:none;}
+.notif-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.notif-body{flex:1;}
+.notif-text{font-size:13px;line-height:1.4;}
+.notif-time{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* ─── COMMISSION ROW ─── */
+.comm-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--bg3);}
+.comm-row:last-child{border-bottom:none;}
+
+/* ─── HOUR ALERT ─── */
+.hour-alert{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;font-size:12.5px;font-weight:500;margin-bottom:10px;}
+.hour-alert.warn{background:var(--accent3-light);color:#92400e;}
+.hour-alert.danger{background:var(--accent4-light);color:#991b1b;}
+.hour-alert.ok{background:var(--accent2-light);color:#065f46;}
+.hour-alert svg{width:16px;height:16px;flex-shrink:0;}
+
+/* ─── OCCUPATION INDICATOR ─── */
+.occ-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;}
+
+/* ─── WEEK CALENDAR ─── */
+.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px;}
+.week-day{background:var(--bg3);border-radius:8px;padding:8px 6px;text-align:center;font-size:11px;}
+.week-day.work{background:var(--accent-light);}
+.week-day.sunday{background:var(--accent3-light);}
+.week-day.holiday{background:var(--accent4-light);}
+.week-day-name{font-weight:700;color:var(--text3);margin-bottom:4px;}
+.week-day.work .week-day-name{color:var(--accent);}
+.week-day.sunday .week-day-name{color:var(--accent3);}
+.week-day.holiday .week-day-name{color:var(--accent4);}
+.week-day-hours{font-family:'Fraunces',serif;font-size:15px;font-weight:700;}
+
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:44px 20px;color:var(--text3);}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.5;}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ─── TOOLTIP ─── */
+[data-tip]{position:relative;}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:11px;padding:4px 9px;border-radius:6px;white-space:nowrap;z-index:999;pointer-events:none;}
+
+/* ─── DIVIDER ─── */
+.divider{border:none;border-top:1px solid var(--border);margin:18px 0;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:960px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .grid-3,.grid-4{grid-template-columns:repeat(2,1fr);}
+  .sidebar-layout{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo-area">
+    <div class="logo-brand">LIMMAN</div>
+    <div class="logo-tagline">Gestión de Servicios</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Principal</div>
+    <button class="nav-link active" onclick="go('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+      <span class="nav-badge">12</span>
+    </button>
+    <button class="nav-link" onclick="go('agenda',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda del Día
+    </button>
+    <button class="nav-link" onclick="go('calendario',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Calendario
+    </button>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Gestión</div>
+    <button class="nav-link" onclick="go('clientes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </button>
+    <button class="nav-link" onclick="go('trabajadoras',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Trabajadoras
+    </button>
+    <button class="nav-link" onclick="go('planes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Planes
+    </button>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Reportes</div>
+    <button class="nav-link" onclick="go('reportes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      KPIs & Reportes
+    </button>
+    <button class="nav-link" onclick="go('comisiones',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="18" x2="12" y2="20"/><line x1="12" y1="6" x2="12" y2="4"/></svg>
+      Comisiones
+    </button>
+    <button class="nav-link" onclick="go('accesos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Accesos y Roles
+    </button>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="av av-md" style="background:#1a56db;">SL</div>
+      <div class="user-info">
+        <div class="uname">Sandra López</div>
+        <div class="urole">Administradora</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════ TOPBAR ══════════════════ -->
+<header class="topbar">
+  <div class="breadcrumb" id="breadcrumb">
+    <span class="bc-item" onclick="go('dashboard',null)">LIMMAN</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-current" id="bc-current">Dashboard</span>
+  </div>
+  <div class="topbar-right">
+    <div class="search-box" style="width:210px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar...">
+    </div>
+    <button class="btn btn-primary" onclick="openModal('m-new-service')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nuevo Servicio
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════════ PAGES ══════════════════ -->
+<!-- Sheets status banner -->
+<div id="sheets-banner" style="position:fixed;top:58px;left:248px;right:0;z-index:99;display:flex;align-items:center;gap:10px;padding:10px 18px;background:#fef3c7;color:#92400e;font-size:12.5px;font-weight:600;border-bottom:1px solid #92400e22;">
+  <span>📋</span><span>Modo demo — configura Google Sheets para guardar datos reales</span>
+  <a href="#" onclick="showSetupModal();return false;" style="margin-left:auto;color:#92400e;text-decoration:underline;font-size:12px;white-space:nowrap;">⚙️ Configurar Google Sheets →</a>
+</div>
+
+<!-- Setup Sheets Modal -->
+<div class="modal-overlay" id="m-setup-sheets">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title">⚙️ Configurar Google Sheets</div><button class="modal-close" onclick="closeModal('m-setup-sheets')">×</button></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+      Sigue estos pasos para conectar el dashboard con Google Sheets:
+      <ol style="margin-top:10px;padding-left:18px;display:flex;flex-direction:column;gap:8px;">
+        <li>Abre <strong>Google Sheets</strong> y crea un nuevo archivo llamado <code>LIMMAN_DB</code></li>
+        <li>Ve a <strong>Extensiones → Apps Script</strong></li>
+        <li>Borra el código existente y pega el código del archivo <code>AppScript.gs</code> que descargaste junto con este dashboard</li>
+        <li>Haz clic en <strong>Implementar → Nueva implementación → Aplicación web</strong></li>
+        <li>En "Ejecutar como" selecciona <strong>Yo</strong>. En "Quién tiene acceso" selecciona <strong>Cualquier persona</strong></li>
+        <li>Copia la URL generada y pégala abajo 👇</li>
+      </ol>
+    </div>
+    <div class="form-group">
+      <div class="form-label">URL del Apps Script *</div>
+      <input class="form-input" id="sheets-url-input" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('m-setup-sheets')">Cancelar</button>
+      <button class="btn btn-primary" onclick="aplicarSheetURL()">Conectar Sheets</button>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+<!-- ── DASHBOARD ── -->
+<div class="page active" id="p-dashboard">
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="stat-label">Servicios Hoy</div>
+      <div class="stat-val" style="color:var(--accent)">12</div>
+      <div class="stat-trend up">↑ 3 más que ayer</div>
+    </div>
+    <div class="stat-card teal">
+      <div class="stat-label">Clientes Activos</div>
+      <div class="stat-val" style="color:var(--accent2)">47</div>
+      <div class="stat-trend up">5 nuevos este mes</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Ocupación Promedio</div>
+      <div class="stat-val" style="color:var(--accent3)">78%</div>
+      <div class="stat-trend">de 44h/semana · Meta 85%</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Ingresos del Mes</div>
+      <div class="stat-val" style="color:var(--accent5)">$14.2M</div>
+      <div class="stat-trend up">↑ 18% vs enero</div>
+    </div>
+  </div>
+
+  <div class="sidebar-layout">
+    <div>
+      <div class="card card-p mb-18">
+        <div class="card-header">
+          <div><div class="card-title">Servicios de Hoy — Lun 23 Feb 2026</div></div>
+          <div class="flex-c gap-8">
+            <span class="badge b-teal dot">8 en curso</span>
+            <span class="badge b-amber dot">2 pendientes</span>
+            <span class="badge b-red dot">2 cancelados</span>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Cliente</th><th>Plan</th><th>Trabajadora</th><th>Horario</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="dash-today"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card card-p">
+        <div class="card-header">
+          <div class="card-title">Próximos Servicios</div>
+          <button class="btn btn-ghost btn-sm" onclick="go('agenda',document.querySelector('[onclick*=agenda]'))">Ver agenda →</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Trabajadora</th><th>Estado</th></tr></thead>
+            <tbody id="dash-upcoming"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div>
+      <!-- OCCUPATION PANEL -->
+      <div class="card card-p mb-18">
+        <div class="card-header">
+          <div class="card-title">Ocupación Semanal</div>
+          <span class="badge b-gray fs-12">44h = 100%</span>
+        </div>
+        <div id="dash-occupation"></div>
+      </div>
+      <!-- FEED -->
+      <div class="card card-p">
+        <div class="card-header"><div class="card-title">Actividad Reciente</div></div>
+        <div class="notif-item"><div class="notif-dot" style="background:var(--accent2)"></div><div class="notif-body"><div class="notif-text">Servicio completado — MTD Colombia con Diana González</div><div class="notif-time">hace 12 min</div></div></div>
+        <div class="notif-item"><div class="notif-dot" style="background:var(--accent)"></div><div class="notif-body"><div class="notif-text">Nuevo cliente registrado — Laboratorio BioTech</div><div class="notif-time">hace 1h</div></div></div>
+        <div class="notif-item"><div class="notif-dot" style="background:var(--accent4)"></div><div class="notif-body"><div class="notif-text">Servicio cancelado — Carlos Quintero (reagendado miércoles)</div><div class="notif-time">hace 2h</div></div></div>
+        <div class="notif-item"><div class="notif-dot" style="background:var(--accent3)"></div><div class="notif-body"><div class="notif-text">Plan contratado — Vengal SAS, Plan 12×4M</div><div class="notif-time">hace 3h</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AGENDA ── -->
+<div class="page" id="p-agenda">
+  <div class="card card-p">
+    <div class="flex-bc mb-18">
+      <div class="flex-c gap-12">
+        <button class="btn btn-ghost btn-sm" onclick="shiftDay(-1)">‹ Anterior</button>
+        <div class="serif" style="font-size:17px;font-weight:700;" id="agenda-date-lbl">Lunes 23 de Febrero, 2026</div>
+        <button class="btn btn-ghost btn-sm" onclick="shiftDay(1)">Siguiente ›</button>
+      </div>
+      <div class="flex-c gap-8">
+        <button class="btn btn-secondary btn-sm" onclick="shiftDay(0,true)">Hoy</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('m-new-service')">+ Nuevo</button>
+      </div>
+    </div>
+    <div class="sched-outer">
+      <table class="sched-table" id="sched-table"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ── CALENDARIO ── -->
+<div class="page" id="p-calendario">
+  <div class="sidebar-layout">
+    <div class="card card-p">
+      <div class="flex-bc mb-18">
+        <div class="flex-c gap-10">
+          <button class="btn btn-ghost btn-sm" onclick="shiftMonth(-1)">‹</button>
+          <div class="serif" style="font-size:17px;font-weight:700;" id="cal-month-lbl">Febrero 2026</div>
+          <button class="btn btn-ghost btn-sm" onclick="shiftMonth(1)">›</button>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="goTodayM()">Hoy</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div>
+      <div class="card card-p mb-18">
+        <div class="card-header"><div class="card-title">Día Seleccionado</div></div>
+        <div id="cal-day-detail"><div class="empty"><div class="empty-icon">📅</div><div>Selecciona un día</div></div></div>
+      </div>
+      <div class="card card-p">
+        <div class="card-header"><div class="card-title">Filtrar Trabajadora</div></div>
+        <div id="cal-filters" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CLIENTES LIST ── -->
+<div class="page" id="p-clientes">
+  <div id="clients-list">
+    <div class="flex-bc mb-22">
+      <div class="flex-c gap-10">
+        <div class="search-box" style="width:270px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Buscar cliente..." id="cli-search" oninput="renderClients()"></div>
+        <div class="flex-c gap-6" id="seg-chips">
+          <div class="chip active" onclick="setSeg('all',this)">Todos</div>
+          <div class="chip" onclick="setSeg('empresa',this)">Empresa</div>
+          <div class="chip" onclick="setSeg('hogar',this)">Hogar</div>
+          <div class="chip" onclick="setSeg('vip',this)">VIP</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('m-new-client')">+ Nuevo Cliente</button>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Cliente</th><th>Tipo</th><th>Plan activo</th><th>Progreso</th><th>Próximo</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="clients-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="client-profile" style="display:none;"></div>
+</div>
+
+<!-- ── TRABAJADORAS LIST ── -->
+<div class="page" id="p-trabajadoras">
+  <div id="workers-list">
+    <div class="flex-bc mb-22">
+      <div class="search-box" style="width:260px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Buscar trabajadora..."></div>
+      <button class="btn btn-primary" onclick="openModal('m-new-worker')">+ Nueva Trabajadora</button>
+    </div>
+    <div class="grid-3" id="workers-grid"></div>
+  </div>
+  <div id="worker-profile" style="display:none;"></div>
+</div>
+
+<!-- ── PLANES ── -->
+<div class="page" id="p-planes">
+  <div class="flex-bc mb-22">
+    <div></div>
+    <button class="btn btn-primary" onclick="openModal('m-new-plan')">+ Nuevo Plan</button>
+  </div>
+  <div class="grid-3" id="plans-grid"></div>
+</div>
+
+<!-- ── REPORTES ── -->
+<div class="page" id="p-reportes">
+  <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+    <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;flex:1">KPIs & Reportes</div>
+    <button class="btn btn-secondary btn-sm" onclick="exportarServicios()">⬇️ Exportar Servicios CSV</button>
+    <button class="btn btn-secondary btn-sm" onclick="exportarClientes()">⬇️ Exportar Clientes CSV</button>
+    <button class="btn btn-secondary btn-sm" onclick="exportarTrabajadoras()">⬇️ Exportar Trabajadoras CSV</button>
+  </div>
+  <div class="stats-row mb-22">
+    <div class="stat-card teal"><div class="stat-label">Ingresos (Mes)</div><div class="stat-val" style="color:var(--accent2)">$14.2M</div><div class="stat-trend up">↑ 18% vs enero</div></div>
+    <div class="stat-card blue"><div class="stat-label">Servicios Realizados</div><div class="stat-val" style="color:var(--accent)">186</div><div class="stat-trend up">↑ 12% vs enero</div></div>
+    <div class="stat-card amber"><div class="stat-label">Ocupación Promedio</div><div class="stat-val" style="color:var(--accent3)">78%</div><div class="stat-trend">Meta: 85%</div></div>
+    <div class="stat-card red"><div class="stat-label">Cancelaciones</div><div class="stat-val" style="color:var(--accent4)">4.2%</div><div class="stat-trend">↓ 1.1% vs enero</div></div>
+  </div>
+  <div class="grid-2 mb-18">
+    <div class="card card-p">
+      <div class="card-header"><div class="card-title">Servicios Más Vendidos</div></div>
+      <table>
+        <thead><tr><th>Servicio</th><th>Cant.</th><th>Ingresos</th></tr></thead>
+        <tbody>
+          <tr><td>Limpieza 4H (Mañana)</td><td><strong>68</strong></td><td style="color:var(--accent2);font-weight:700">$5.4M</td></tr>
+          <tr><td>Limpieza 8H (Full Day)</td><td><strong>42</strong></td><td style="color:var(--accent2);font-weight:700">$6.7M</td></tr>
+          <tr><td>Limpieza 4H (Tarde)</td><td><strong>38</strong></td><td style="color:var(--accent2);font-weight:700">$3.0M</td></tr>
+          <tr><td>Express 2 Horas</td><td><strong>22</strong></td><td style="color:var(--accent2);font-weight:700">$880K</td></tr>
+          <tr><td>Post-Obra Especial</td><td><strong>16</strong></td><td style="color:var(--accent2);font-weight:700">$3.2M</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card card-p">
+      <div class="card-header"><div class="card-title">Productividad por Profesional</div></div>
+      <div id="productivity-list"></div>
+    </div>
+  </div>
+  <div class="card card-p">
+    <div class="card-header"><div class="card-title">Ocupación Semanal — Control de Horas (44h = 100%)</div></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Trabajadora</th><th>Horas Semana</th><th>Horas Extra</th><th>Dominicales/Festivas</th><th>Ocupación</th><th>Alerta</th></tr></thead>
+        <tbody id="hours-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── COMISIONES ── -->
+<div class="page" id="p-comisiones">
+  <div class="grid-2">
+    <div class="card card-p">
+      <div class="card-header">
+        <div class="card-title">Comisiones — Febrero 2026</div>
+        <button class="btn btn-secondary btn-sm" onclick="exportarComisiones()">⬇️ Exportar CSV</button>
+        <select class="form-select" style="width:auto;padding:5px 30px 5px 10px;font-size:12px"><option>Febrero 2026</option><option>Enero 2026</option></select>
+      </div>
+      <div id="commissions-list"></div>
+    </div>
+    <div class="card card-p">
+      <div class="card-header"><div class="card-title">Configurar Comisiones</div></div>
+      <div class="form-group"><div class="form-label">Tipo de cálculo</div><select class="form-select"><option>% por servicio completado</option><option>Monto fijo por servicio</option><option>Bono por meta mensual</option></select></div>
+      <div class="form-grid-2">
+        <div class="form-group"><div class="form-label">% Base</div><input type="number" class="form-input" value="15"></div>
+        <div class="form-group"><div class="form-label">% Horas Extra</div><input type="number" class="form-input" value="25"></div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group"><div class="form-label">% Dominical/Festivo</div><input type="number" class="form-input" value="75"></div>
+        <div class="form-group"><div class="form-label">Bono meta (servicios)</div><input type="number" class="form-input" value="20"></div>
+      </div>
+      <div class="form-group"><div class="form-label">Valor bono</div><input class="form-input" value="$150.000"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center">Guardar configuración</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACCESOS ── -->
+<div class="page" id="p-accesos">
+  <div class="grid-2">
+    <div class="card card-p">
+      <div class="card-header"><div class="card-title">Usuarios del Sistema</div><button class="btn btn-primary btn-sm" onclick="openModal('m-new-user')">+ Usuario</button></div>
+      <table>
+        <thead><tr><th>Usuario</th><th>Rol</th><th>Último acceso</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr><td><div class="flex-c gap-8"><div class="av av-sm" style="background:var(--accent)">SL</div><div><div class="fw-6 fs-13">Sandra López</div><div class="t3 fs-12">admin@limman.co</div></div></div></td><td><span class="badge b-blue">Admin</span></td><td class="t2 fs-12">Ahora</td><td><span class="badge b-teal dot">Activo</span></td></tr>
+          <tr><td><div class="flex-c gap-8"><div class="av av-sm" style="background:var(--accent2)">JM</div><div><div class="fw-6 fs-13">Juliana Morales</div><div class="t3 fs-12">admin@limman.co</div></div></div></td><td><span class="badge b-amber">Coordinadora</span></td><td class="t2 fs-12">hace 2h</td><td><span class="badge b-teal dot">Activo</span></td></tr>
+          <tr><td><div class="flex-c gap-8"><div class="av av-sm" style="background:var(--accent5)">AL</div><div><div class="fw-6 fs-13">Angelica Londoño</div><div class="t3 fs-12">admin@limman.co</div></div></div></td><td><span class="badge b-gray">Trabajadora</span></td><td class="t2 fs-12">hace 4h</td><td><span class="badge b-teal dot">Activo</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card card-p">
+      <div class="card-header"><div class="card-title">Permisos por Rol</div></div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div><div class="flex-bc mb-6"><strong class="fs-13">👑 Administrador</strong><span class="badge b-blue">Admin</span></div><div class="t2 fs-12">Acceso total a todos los módulos: dashboard, agenda, clientes, trabajadoras, planes, reportes, comisiones y configuración del sistema.</div></div>
+        <hr class="divider">
+        <div><div class="flex-bc mb-6"><strong class="fs-13">📋 Coordinadora</strong><span class="badge b-amber">Manager</span></div><div class="t2 fs-12">Dashboard, agenda, clientes, trabajadoras y reportes de ocupación. Sin acceso a comisiones ni configuración.</div></div>
+        <hr class="divider">
+        <div><div class="flex-bc mb-6"><strong class="fs-13">🧹 Trabajadora</strong><span class="badge b-gray">Worker</span></div><div class="t2 fs-12">Solo ve su agenda personal del día, puede confirmar asistencia y ver datos de contacto del cliente asignado.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ══════════════════ MODALS ══════════════════ -->
+
+<!-- New Service -->
+<div class="modal-overlay" id="m-new-service">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title">Nuevo Servicio</div><button class="modal-close" onclick="closeModal('m-new-service')">×</button></div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Cliente *</div><select class="form-select" id="ns-client"></select></div>
+      <div class="form-group"><div class="form-label">Plan vinculado</div><select class="form-select" id="ns-plan"></select></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Trabajadora *</div><select class="form-select" id="ns-worker"></select></div>
+      <div class="form-group"><div class="form-label">Tipo de servicio</div><select class="form-select" id="ns-service"><option>Limpieza 4 Horas (Mañana)</option><option>Limpieza 4 Horas (Tarde)</option><option>Limpieza 8 Horas (Full Day)</option><option>Express 2 Horas</option><option>Post-Obra Especial</option></select></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Fecha *</div><input type="date" class="form-input" id="ns-date"></div>
+      <div class="form-group"><div class="form-label">Hora inicio</div><input type="time" class="form-input" id="ns-time" value="07:00"></div>
+    </div>
+    <div class="form-group"><div class="form-label">Nota interna</div><textarea class="form-textarea" placeholder="Instrucciones especiales, código de acceso, materiales..."></textarea></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('m-new-service')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarServicio()">Guardar Servicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Client -->
+<div class="modal-overlay" id="m-new-client">
+  <div class="modal-box modal-lg">
+    <div class="modal-hd"><div class="modal-title">Nuevo Cliente</div><button class="modal-close" onclick="closeModal('m-new-client')">×</button></div>
+    <div class="form-grid-3">
+      <div class="form-group"><div class="form-label">Nombre / Empresa *</div><input class="form-input" id="nc-name" placeholder="MTD de Colombia S.A.S"></div>
+      <div class="form-group"><div class="form-label">Tipo</div><select class="form-select" id="nc-type"><option>Empresa</option><option>Hogar</option><option>VIP</option></select></div>
+      <div class="form-group"><div class="form-label">NIT / Cédula</div><input class="form-input" id="nc-nit" placeholder="800.000.000-0"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Email</div><input class="form-input" id="nc-email" type="email"></div>
+      <div class="form-group"><div class="form-label">WhatsApp</div><input class="form-input" id="nc-phone" placeholder="+57 300 000 0000"></div>
+    </div>
+    <div class="form-group"><div class="form-label">Dirección del servicio</div><input class="form-input" id="nc-address" placeholder="Calle 100 # 15-40, Bogotá"></div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Segmento</div><select class="form-select" id="nc-segment"><option value="empresa">Empresa</option><option value="hogar">Hogar</option><option value="vip">VIP</option></select></div>
+      <div class="form-group"><div class="form-label">Plan inicial</div><select class="form-select" id="nc-plan"></select></div>
+    </div>
+    <div class="form-group"><div class="form-label">Notas internas</div><textarea class="form-textarea" id="nc-notes" placeholder="Acceso, preferencias, instrucciones especiales..."></textarea></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('m-new-client')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarCliente()">Registrar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Worker -->
+<div class="modal-overlay" id="m-new-worker">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title">Nueva Trabajadora</div><button class="modal-close" onclick="closeModal('m-new-worker')">×</button></div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Nombre completo *</div><input class="form-input" id="nw-name"></div>
+      <div class="form-group"><div class="form-label">Cédula</div><input class="form-input" id="nw-cedula"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">WhatsApp *</div><input class="form-input" id="nw-phone" placeholder="+57 300 000 0000"></div>
+      <div class="form-group"><div class="form-label">Zona</div><select class="form-select" id="nw-zone"><option>Norte</option><option>Sur</option><option>Centro</option><option>Occidente</option></select></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Turno</div><select class="form-select" id="nw-shift"><option>Mañana (6am–2pm)</option><option>Tarde (2pm–10pm)</option><option>Full day</option></select></div>
+      <div class="form-group"><div class="form-label">% Comisión base</div><input type="number" class="form-input" id="nw-commission" value="15"></div>
+    </div>
+    <div class="form-group"><div class="form-label">Notas</div><textarea class="form-textarea" id="nw-notes" placeholder="Habilidades, restricciones, observaciones..."></textarea></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('m-new-worker')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarTrabajadora()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Plan -->
+<div class="modal-overlay" id="m-new-plan">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title">Nuevo Plan</div><button class="modal-close" onclick="closeModal('m-new-plan')">×</button></div>
+    <div class="form-group"><div class="form-label">Nombre del plan *</div><input class="form-input" id="np-name" placeholder="Plan 12×4M"></div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Total servicios</div><input type="number" class="form-input" id="np-total" value="12"></div>
+      <div class="form-group"><div class="form-label">Horas por servicio</div><input type="number" class="form-input" id="np-hours" value="4"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Precio total</div><input class="form-input" id="np-price" value="$1.200.000"></div>
+      <div class="form-group"><div class="form-label">Frecuencia</div><select class="form-select" id="np-freq"><option>Semanal</option><option>Quincenal</option><option>Mensual</option><option>A demanda</option></select></div>
+    </div>
+    <div class="form-group"><div class="form-label">Descripción</div><textarea class="form-textarea"></textarea></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('m-new-plan')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPlan()">Crear Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- New User -->
+<div class="modal-overlay" id="m-new-user">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title">Nuevo Usuario</div><button class="modal-close" onclick="closeModal('m-new-user')">×</button></div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Nombre *</div><input class="form-input"></div>
+      <div class="form-group"><div class="form-label">Email *</div><input class="form-input" type="email" placeholder="usuario@limman.co"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><div class="form-label">Rol</div><select class="form-select"><option>Admin</option><option>Coordinadora</option><option>Trabajadora</option></select></div>
+      <div class="form-group"><div class="form-label">Contraseña temporal</div><input class="form-input" type="password"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('m-new-user')">Cancelar</button>
+      <button class="btn btn-primary" onclick="toastSave('Usuario creado');closeModal('m-new-user')">Crear Usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;bottom:28px;right:28px;background:var(--text);color:#fff;padding:13px 20px;border-radius:12px;font-size:13.5px;font-weight:600;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px;">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- ══════════════════ JS ══════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════════════════════════════
+const SUPA_URL  = 'https://lbeuwbyltygpdaiitcun.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxiZXV3YnlsdHlncGRhaWl0Y3VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Nzc0MTUsImV4cCI6MjA4NzQ1MzQxNX0.sm4drrPrAJhZZmAy9Yr0IiVeA9zj2OZdOgAx-KtdqvI';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ═══════════════════════════════════════════════════════════════
+// DATA CACHE (se llena desde Supabase al cargar)
+// ═══════════════════════════════════════════════════════════════
+const COLORS   = ['#1a56db','#0d9488','#d97706','#dc2626','#7c3aed','#db2777','#059669','#ea580c'];
+const HOLIDAYS = ['01-01','01-12','03-23','04-02','04-03','05-01','05-18','06-08','06-29','07-04','07-20','08-07','08-17','10-12','11-02','11-16','12-08','12-25'];
+
+let workers  = [];
+let plans    = [];
+let clients  = [];
+let services = [];
+
+// ═══════════════════════════════════════════════════════════════
+// SUPABASE — CARGAR TODOS LOS DATOS
+// ═══════════════════════════════════════════════════════════════
+async function loadAll() {
+  setBanner('loading');
+  try {
+    const [rP, rW, rC, rS] = await Promise.all([
+      sb.from('planes').select('*').order('id'),
+      sb.from('trabajadoras').select('*').order('id'),
+      sb.from('clientes').select('*').order('id'),
+      sb.from('servicios').select('*').order('date'),
+    ]);
+
+    if (rP.error || rW.error || rC.error || rS.error) {
+      console.error('Supabase errors:', rP.error, rW.error, rC.error, rS.error);
+      setBanner('error');
+      loadFallback();
+      return;
+    }
+
+    plans    = rP.data || [];
+    workers  = rW.data || [];
+    clients  = rC.data.map(c=>({...c, planId:c.plan_id, workerId:c.worker_id, next:c.next_service})) || [];
+    services = rS.data.map(s=>({...s, clientId:s.client_id, workerId:s.worker_id, end:s.end_time})) || [];
+
+    setBanner(workers.length ? 'connected' : 'empty');
+  } catch(e) {
+    console.error('loadAll error:', e);
+    setBanner('error');
+    loadFallback();
+  }
+  refreshAll();
+}
+
+// Datos de ejemplo si Supabase falla o está vacío
+function loadFallback() {
+  workers = [
+    {id:1,name:'Angelica Londoño',initials:'AL',phone:'+57 311 234 5678',zone:'Norte',shift:'Mañana (6am–2pm)',hours_per_service:4,services:18,commission:15,color:'#1a56db',status:'Activa',schedule:{'2026-02-23':{hours:8,type:'normal'},'2026-02-24':{hours:8,type:'normal'},'2026-02-25':{hours:8,type:'normal'},'2026-02-26':{hours:8,type:'normal'},'2026-02-27':{hours:4,type:'normal'},'2026-02-28':{hours:0,type:'off'},'2026-03-01':{hours:4,type:'sunday'}}},
+    {id:2,name:'Carolina Martínez',initials:'CM',phone:'+57 312 345 6789',zone:'Centro',shift:'Mañana (6am–2pm)',hours_per_service:4,services:22,commission:15,color:'#0d9488',status:'Activa',schedule:{'2026-02-23':{hours:8,type:'normal'},'2026-02-24':{hours:8,type:'normal'},'2026-02-25':{hours:8,type:'normal'},'2026-02-26':{hours:4,type:'normal'},'2026-02-27':{hours:8,type:'normal'},'2026-02-28':{hours:4,type:'normal'},'2026-03-01':{hours:0,type:'off'}}},
+    {id:3,name:'Deisy Cruz',       initials:'DC',phone:'+57 313 456 7890',zone:'Norte',shift:'Full day',           hours_per_service:8,services:14,commission:15,color:'#d97706',status:'Activa',schedule:{'2026-02-23':{hours:8,type:'normal'},'2026-02-24':{hours:0,type:'off'},'2026-02-25':{hours:8,type:'normal'},'2026-02-26':{hours:8,type:'normal'},'2026-02-27':{hours:8,type:'normal'},'2026-02-28':{hours:4,type:'normal'},'2026-03-01':{hours:0,type:'off'}}},
+    {id:4,name:'Diana González',   initials:'DG',phone:'+57 314 567 8901',zone:'Sur',  shift:'Mañana (6am–2pm)',hours_per_service:8,services:20,commission:18,color:'#7c3aed',status:'Activa',schedule:{'2026-02-23':{hours:8,type:'normal'},'2026-02-24':{hours:8,type:'normal'},'2026-02-25':{hours:8,type:'normal'},'2026-02-26':{hours:8,type:'normal'},'2026-02-27':{hours:8,type:'normal'},'2026-02-28':{hours:8,type:'normal'},'2026-03-01':{hours:4,type:'sunday'}}},
+    {id:5,name:'Olga Lucía',       initials:'OL',phone:'+57 315 678 9012',zone:'Occidente',shift:'Tarde (2pm–10pm)',hours_per_service:4,services:10,commission:15,color:'#db2777',status:'Incapacitada',schedule:{}},
+    {id:6,name:'Osiris Quiñones',  initials:'OQ',phone:'+57 316 789 0123',zone:'Sur',  shift:'Full day',           hours_per_service:8,services:16,commission:15,color:'#059669',status:'Activa',schedule:{'2026-02-23':{hours:8,type:'normal'},'2026-02-24':{hours:8,type:'normal'},'2026-02-25':{hours:8,type:'normal'},'2026-02-26':{hours:8,type:'normal'},'2026-02-27':{hours:8,type:'normal'},'2026-02-28':{hours:0,type:'off'},'2026-03-01':{hours:0,type:'off'}}},
+    {id:7,name:'Anyela Viviana B.',initials:'AV',phone:'+57 317 890 1234',zone:'Norte',shift:'Mañana (6am–2pm)',hours_per_service:4,services:19,commission:17,color:'#ea580c',status:'Activa',schedule:{'2026-02-23':{hours:8,type:'normal'},'2026-02-24':{hours:8,type:'normal'},'2026-02-25':{hours:4,type:'normal'},'2026-02-26':{hours:8,type:'normal'},'2026-02-27':{hours:8,type:'normal'},'2026-02-28':{hours:8,type:'normal'},'2026-03-01':{hours:0,type:'off'}}},
+  ];
+  plans = [
+    {id:1,name:'Plan 12×4M',total:12,hours:4,price:'$1.200.000',freq:'Semanal'},
+    {id:2,name:'Plan 12×8',total:12,hours:8,price:'$2.400.000',freq:'Semanal'},
+    {id:3,name:'Plan 8×4M',total:8,hours:4,price:'$800.000',freq:'Quincenal'},
+    {id:4,name:'Único 4H',total:1,hours:4,price:'$120.000',freq:'A demanda'},
+    {id:5,name:'Plan VIP Mensual',total:16,hours:8,price:'$3.600.000',freq:'Semanal'},
+  ];
+  clients = [
+    {id:1,name:'MTD De Colombia S.A.S',type:'Empresa',segment:'vip',nit:'900.123.456-1',email:'admin@mtdcolombia.com',phone:'+57 601 234 5678',address:'Calle 90 # 14-30, Bogotá',planId:2,used:8,next:'Hoy',workerId:4,notes:'Acceso por portería principal.',status:'Activo',since:'15/03/2023'},
+    {id:2,name:'Vengal SAS',type:'Empresa',segment:'empresa',nit:'800.234.567-2',email:'ops@vengal.com.co',phone:'+57 601 345 6789',address:'Cra 15 # 88-54, Bogotá',planId:1,used:3,next:'Hoy',workerId:5,notes:'Código de acceso: 1234#',status:'Activo',since:'02/07/2023'},
+    {id:3,name:'Invest In Bogotá',type:'Empresa',segment:'empresa',nit:'900.345.678-3',email:'info@investbogota.gov.co',phone:'+57 601 456 7890',address:'Av Eldorado # 66-63, Bogotá',planId:4,used:1,next:'Hoy',workerId:2,notes:'Único servicio.',status:'Activo',since:'20/01/2026'},
+    {id:4,name:'Carlos M. Quintero',type:'Hogar',segment:'hogar',nit:'79.234.567',email:'cmquintero@gmail.com',phone:'+57 314 567 8901',address:'Cra 7 # 127-43, Apto 502',planId:1,used:4,next:'Hoy',workerId:7,notes:'Solo mañana. Tiene perro.',status:'Activo',since:'10/09/2024'},
+    {id:5,name:'Unión Soluciones',type:'Empresa',segment:'vip',nit:'800.233.464-6',email:'contabilidad@unionsoluciones.com.co',phone:'+57313886636',address:'Calle 72 # 10-07, Bogotá',planId:1,used:3,next:'Jueves',workerId:1,notes:'Facturas a nombre empresa.',status:'Activo',since:'15/12/2022'},
+    {id:6,name:'Laboratorio BioTech',type:'Empresa',segment:'empresa',nit:'900.456.789-4',email:'admin@biotech.com.co',phone:'+57 601 567 8901',address:'Cra 50 # 94-45, Bogotá',planId:5,used:0,next:'Miércoles',workerId:3,notes:'Requiere EPP.',status:'Activo',since:'23/02/2026'},
+  ];
+  services = [
+    {id:1,clientId:1,workerId:4,date:'2026-02-23',time:'07:30',end:'16:00',service:'Limpieza 8H (Full Day)',plan:'Plan 12×8',status:'En curso'},
+    {id:2,clientId:2,workerId:5,date:'2026-02-23',time:'08:00',end:'12:00',service:'Limpieza 4H (Mañana)',plan:'Plan 12×4M',status:'En curso'},
+    {id:3,clientId:3,workerId:2,date:'2026-02-23',time:'06:00',end:'10:00',service:'Limpieza 4H (Mañana)',plan:'Único 4H',status:'Completado'},
+    {id:4,clientId:4,workerId:7,date:'2026-02-23',time:'08:00',end:'12:00',service:'Limpieza 4H (Mañana)',plan:'Plan 12×4M',status:'En curso'},
+    {id:5,clientId:5,workerId:1,date:'2026-02-26',time:'07:00',end:'11:00',service:'Limpieza 4H (Mañana)',plan:'Plan 12×4M',status:'Programado'},
+    {id:6,clientId:1,workerId:4,date:'2026-02-25',time:'07:30',end:'16:00',service:'Limpieza 8H (Full Day)',plan:'Plan 12×8',status:'Programado'},
+  ];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BANNER DE ESTADO
+// ═══════════════════════════════════════════════════════════════
+function setBanner(state) {
+  const b = document.getElementById('sheets-banner');
+  if (!b) return;
+  const cfg = {
+    loading:   {bg:'#e0f2fe',c:'#0369a1',icon:'⏳',msg:'Conectando con Supabase...'},
+    connected: {bg:'#d1fae5',c:'#065f46',icon:'✅',msg:'Supabase conectado — datos en tiempo real'},
+    empty:     {bg:'#fef3c7',c:'#92400e',icon:'📋',msg:'Supabase conectado — ejecuta el SQL de setup para cargar datos de ejemplo'},
+    error:     {bg:'#fee2e2',c:'#991b1b',icon:'⚠️',msg:'Sin conexión a Supabase — mostrando datos demo'},
+  };
+  const s = cfg[state] || cfg.error;
+  b.style.cssText = `position:fixed;top:58px;left:248px;right:0;z-index:99;display:flex;align-items:center;gap:10px;padding:8px 18px;background:${s.bg};color:${s.c};font-size:12px;font-weight:600;border-bottom:1px solid ${s.c}33;`;
+  b.innerHTML = `<span>${s.icon}</span><span>${s.msg}</span>`;
+}
+
+function refreshAll() {
+  if (currentPage === 'dashboard')    renderDashboard();
+  if (currentPage === 'agenda')       renderAgenda();
+  if (currentPage === 'calendario')   renderCalendar();
+  if (currentPage === 'clientes')     renderClients();
+  if (currentPage === 'trabajadoras') renderWorkers();
+  if (currentPage === 'planes')       renderPlans();
+  if (currentPage === 'reportes')     { renderProductivity(); renderHoursTable(); }
+  if (currentPage === 'comisiones')   renderCommissions();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+const gc  = id => clients.find(x => x.id === id);
+const gw  = id => workers.find(x => x.id === id);
+const gp  = id => plans.find(x => x.id === id);
+const nid = arr => arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1;
+
+function isHoliday(d) { return HOLIDAYS.includes(d.slice(5)); }
+function isSunday(d)  { return new Date(d + 'T12:00:00').getDay() === 0; }
+
+function badge(label, cls) { return `<span class="badge ${cls}">${label}</span>`; }
+function statusBadge(s) {
+  const m = {'Programado':'b-blue dot','En curso':'b-amber dot','Completado':'b-teal dot','Cancelado':'b-red dot','Activa':'b-teal dot','Activo':'b-teal dot','Incapacitada':'b-red dot'};
+  return badge(s, m[s] || 'b-gray dot');
+}
+function segBadge(s) {
+  return badge({vip:'VIP',empresa:'Empresa',hogar:'Hogar'}[s]||s, {vip:'b-blue',empresa:'b-teal',hogar:'b-amber'}[s]||'b-gray');
+}
+function prog(used, total) {
+  const pct = total > 0 ? Math.round(used/total*100) : 0;
+  const col = pct>85?'var(--accent4)':pct>60?'var(--accent3)':'var(--accent2)';
+  return `<div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${col}"></div></div><span class="prog-label">${used}/${total}</span></div>`;
+}
+function radialGauge(pct, color, label) {
+  pct = Math.min(100, pct);
+  const r=34, c=2*Math.PI*r, offset=c-(pct/100)*c;
+  const col = pct>100?'var(--accent4)':pct>85?'var(--accent3)':color;
+  return `<div class="gauge-wrap"><svg class="gauge-svg" viewBox="0 0 90 90"><circle class="gauge-track" cx="45" cy="45" r="${r}"/><circle class="gauge-fill" cx="45" cy="45" r="${r}" stroke="${col}" stroke-dasharray="${c}" stroke-dashoffset="${offset}"/></svg><div class="gauge-center"><div class="gauge-pct" style="color:${col}">${pct}%</div><div class="gauge-pct-label">${label}</div></div></div>`;
+}
+function radialGaugeMini(pct, color) {
+  const col = pct>100?'var(--accent4)':pct>85?'var(--accent3)':color;
+  return `<span class="badge" style="background:${col}22;color:${col}">${Math.min(pct,120)}%</span>`;
+}
+function computeWeekHours(worker) {
+  const LAW=44; const sched=worker.schedule||{}; let total=0,sunday=0,holiday=0;
+  Object.entries(sched).forEach(([d,e])=>{ if(!e||!e.hours) return; const h=e.hours; if(isHoliday(d)) holiday+=h; else if(isSunday(d)) sunday+=h; total+=h; });
+  const extra=Math.max(0,total-LAW), regularHours=Math.min(total,LAW), occ=Math.round(total/LAW*100);
+  return {total,extra,sunday,holiday,occ,regularHours,LAW_HOURS:LAW};
+}
+function hoursAlert(h) {
+  if(h.extra>0) return {type:'danger',msg:`⚠️ ${h.extra}h EXTRA (supera 44h/semana)`};
+  if(h.occ>90)  return {type:'warn',msg:`${h.occ}% ocupación — cerca del límite`};
+  return {type:'ok',msg:`${h.occ}% ocupación — dentro del límite legal`};
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(()=> t.style.opacity='0', 2800);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+const PAGE_TITLES = {dashboard:'Dashboard',agenda:'Agenda del Día',calendario:'Calendario',clientes:'Clientes',trabajadoras:'Trabajadoras',planes:'Planes',reportes:'KPIs & Reportes',comisiones:'Comisiones',accesos:'Accesos y Roles'};
+let currentPage = 'dashboard';
+
+function go(page, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  const p = document.getElementById('p-'+page);
+  if (p) p.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  else { const el = document.querySelector(`.nav-link[onclick*="'${page}'"]`); if(el) el.classList.add('active'); }
+  document.getElementById('bc-current').textContent = PAGE_TITLES[page]||page;
+  currentPage = page;
+  if (page==='clientes')     showClientsListView();
+  if (page==='trabajadoras') showWorkersListView();
+  if (page==='agenda')       renderAgenda();
+  if (page==='calendario')   renderCalendar();
+  if (page==='planes')       renderPlans();
+  if (page==='reportes')     { renderProductivity(); renderHoursTable(); }
+  if (page==='comisiones')   renderCommissions();
+  window.scrollTo(0,0);
+}
+function pushBC(extra) { document.getElementById('bc-current').textContent = PAGE_TITLES[currentPage]+' › '+extra; }
+
+// ═══════════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════════
+function openModal(id)  { populateSelects(); document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+
+function populateSelects() {
+  const cl = document.getElementById('ns-client');
+  if(cl) cl.innerHTML = clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  const wk = document.getElementById('ns-worker');
+  if(wk) wk.innerHTML = workers.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
+  const planOpts = '<option value="">Sin plan</option>'+plans.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  ['ns-plan','nc-plan'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=planOpts; });
+  const nd = document.getElementById('ns-date');
+  if(nd) nd.value = new Date().toISOString().split('T')[0];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GUARDAR SERVICIO
+// ═══════════════════════════════════════════════════════════════
+async function guardarServicio() {
+  const clientId  = parseInt(document.getElementById('ns-client')?.value);
+  const workerId  = parseInt(document.getElementById('ns-worker')?.value);
+  const date      = document.getElementById('ns-date')?.value;
+  const time      = document.getElementById('ns-time')?.value || '08:00';
+  const svcType   = document.getElementById('ns-service')?.value || 'Limpieza';
+  const planId    = parseInt(document.getElementById('ns-plan')?.value) || null;
+  if (!clientId||!workerId||!date) { alert('Completa cliente, trabajadora y fecha.'); return; }
+  const p = gp(planId);
+  const hours = p ? p.hours : 4;
+  const [hh] = time.split(':').map(Number);
+  const endTime = `${String(hh+hours).padStart(2,'0')}:00`;
+  const record = { client_id:clientId, worker_id:workerId, date, time, end_time:endTime, service:svcType, plan:p?.name||'Sin plan', status:'Programado' };
+  const { data, error } = await sb.from('servicios').insert([record]).select().single();
+  if (error) { console.error(error); toast('Error al guardar: '+error.message, false); return; }
+  services.push({...data, clientId:data.client_id, workerId:data.worker_id, end:data.end_time});
+  closeModal('m-new-service');
+  toast('Servicio agendado correctamente ✓');
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GUARDAR CLIENTE
+// ═══════════════════════════════════════════════════════════════
+async function guardarCliente() {
+  const name = document.getElementById('nc-name')?.value?.trim();
+  if (!name) { alert('El nombre es obligatorio.'); return; }
+  const record = {
+    name,
+    type:         document.getElementById('nc-type')?.value || 'Empresa',
+    segment:      document.getElementById('nc-segment')?.value || 'empresa',
+    nit:          document.getElementById('nc-nit')?.value?.trim()||'',
+    email:        document.getElementById('nc-email')?.value?.trim()||'',
+    phone:        document.getElementById('nc-phone')?.value?.trim()||'',
+    address:      document.getElementById('nc-address')?.value?.trim()||'',
+    plan_id:      parseInt(document.getElementById('nc-plan')?.value)||null,
+    notes:        document.getElementById('nc-notes')?.value?.trim()||'',
+    used:         0,
+    status:       'Activo',
+    since:        new Date().toLocaleDateString('es-CO'),
+  };
+  const { data, error } = await sb.from('clientes').insert([record]).select().single();
+  if (error) { console.error(error); toast('Error: '+error.message, false); return; }
+  clients.push({...data, planId:data.plan_id, workerId:data.worker_id, next:data.next_service||'—'});
+  closeModal('m-new-client');
+  toast('Cliente registrado correctamente ✓');
+  renderClients();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GUARDAR TRABAJADORA
+// ═══════════════════════════════════════════════════════════════
+async function guardarTrabajadora() {
+  const name = document.getElementById('nw-name')?.value?.trim();
+  if (!name) { alert('El nombre es obligatorio.'); return; }
+  const initials = name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  const record = {
+    name, initials,
+    phone:      document.getElementById('nw-phone')?.value?.trim()||'',
+    zone:       document.getElementById('nw-zone')?.value||'Norte',
+    shift:      document.getElementById('nw-shift')?.value||'Mañana (6am–2pm)',
+    commission: parseFloat(document.getElementById('nw-commission')?.value)||15,
+    color:      COLORS[workers.length % COLORS.length],
+    status:     'Activa',
+    services:   0,
+    hours_per_service: 4,
+    schedule:   {},
+  };
+  const { data, error } = await sb.from('trabajadoras').insert([record]).select().single();
+  if (error) { console.error(error); toast('Error: '+error.message, false); return; }
+  workers.push(data);
+  closeModal('m-new-worker');
+  toast('Trabajadora registrada correctamente ✓');
+  renderWorkers();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GUARDAR PLAN
+// ═══════════════════════════════════════════════════════════════
+async function guardarPlan() {
+  const name = document.getElementById('np-name')?.value?.trim();
+  if (!name) { alert('El nombre es obligatorio.'); return; }
+  const record = {
+    name,
+    total: parseInt(document.getElementById('np-total')?.value)||12,
+    hours: parseInt(document.getElementById('np-hours')?.value)||4,
+    price: document.getElementById('np-price')?.value?.trim()||'',
+    freq:  document.getElementById('np-freq')?.value||'Semanal',
+  };
+  const { data, error } = await sb.from('planes').insert([record]).select().single();
+  if (error) { console.error(error); toast('Error: '+error.message, false); return; }
+  plans.push(data);
+  closeModal('m-new-plan');
+  toast('Plan creado correctamente ✓');
+  renderPlans();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GUARDAR NOTA CLIENTE
+// ═══════════════════════════════════════════════════════════════
+async function guardarNotaCliente(id) {
+  const val = document.getElementById(`nota-cliente-${id}`)?.value;
+  await sb.from('clientes').update({ notes: val }).eq('id', id);
+  const c = clients.find(x=>x.id===id); if(c) c.notes=val;
+  toast('Nota guardada ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CAMBIAR ESTADO DE SERVICIO
+// ═══════════════════════════════════════════════════════════════
+async function cambiarEstado(id, nuevoEstado) {
+  await sb.from('servicios').update({ status: nuevoEstado }).eq('id', id);
+  const s = services.find(x=>x.id===id); if(s) s.status=nuevoEstado;
+  toast(`Estado actualizado: ${nuevoEstado} ✓`);
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ELIMINAR PLAN
+// ═══════════════════════════════════════════════════════════════
+async function eliminarPlan(id) {
+  if (!confirm('¿Eliminar este plan?')) return;
+  await sb.from('planes').delete().eq('id', id);
+  plans = plans.filter(x=>x.id!==id);
+  toast('Plan eliminado');
+  renderPlans();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORTAR CSV
+// ═══════════════════════════════════════════════════════════════
+function exportCSV(data, filename) {
+  if (!data.length) { alert('No hay datos para exportar.'); return; }
+  const keys = Object.keys(data[0]);
+  const rows = [keys.join(','), ...data.map(r => keys.map(k => `"${String(r[k]??'').replace(/"/g,'""')}"`).join(','))];
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+rows.join('\n')], {type:'text/csv;charset=utf-8;'}));
+  a.download = filename; a.click();
+  toast(`Exportado: ${filename} ✓`);
+}
+function exportarServicios()   { exportCSV(services.map(s=>({Fecha:s.date,Hora:s.time,HoraFin:s.end,Cliente:gc(s.clientId)?.name||'',Trabajadora:gw(s.workerId)?.name||'',Servicio:s.service,Plan:s.plan,Estado:s.status})), `servicios_${new Date().toISOString().slice(0,10)}.csv`); }
+function exportarClientes()    { exportCSV(clients.map(c=>({Nombre:c.name,Tipo:c.type,Segmento:c.segment,NIT:c.nit,Email:c.email,Telefono:c.phone,Plan:gp(c.planId)?.name||'',Usados:c.used,Estado:c.status,Desde:c.since})), `clientes_${new Date().toISOString().slice(0,10)}.csv`); }
+function exportarTrabajadoras(){ exportCSV(workers.map(w=>({Nombre:w.name,Zona:w.zone,Turno:w.shift,Telefono:w.phone,Estado:w.status,Servicios:w.services,Comision:w.commission+'%'})), `trabajadoras_${new Date().toISOString().slice(0,10)}.csv`); }
+function exportarComisiones()  {
+  exportCSV(workers.map(w=>{ const h=computeWeekHours(w); const base=Math.round(w.services*120000*w.commission/100); const ext=Math.round(h.extra*15000*0.25); const dom=Math.round(h.sunday*15000*0.75); const bonus=w.services>=20?150000:0; return {Trabajadora:w.name,HorasOrdinarias:h.regularHours,HorasExtra:h.extra,HorasDominicales:h.sunday,ComisionBase:'$'+base,RecargoExtra:'$'+ext,RecargoDominical:'$'+dom,Bono:'$'+bonus,Total:'$'+(base+ext+dom+bonus)}; }), `comisiones_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function renderDashboard() {
+  const hoy = new Date().toISOString().split('T')[0];
+  const todaySvcs = services.filter(s => s.date === hoy || s.date === '2026-02-23');
+  const el = document.getElementById('dash-today');
+  if (el) el.innerHTML = todaySvcs.map(s => {
+    const c=gc(s.clientId), w=gw(s.workerId); if(!c||!w) return '';
+    return `<tr>
+      <td><div class="flex-c gap-8"><div class="av av-sm" style="background:${COLORS[c.id%COLORS.length]}">${c.name.slice(0,2)}</div><div><div class="fw-6 fs-13">${c.name}</div><div class="t3 fs-12">${c.address?.split(',')[0]||''}</div></div></div></td>
+      <td class="t2 fs-12">${s.plan}</td>
+      <td><div class="flex-c gap-6"><div class="av av-sm" style="background:${w.color}">${w.initials}</div><span class="fs-12">${w.name.split(' ')[0]}</span></div></td>
+      <td class="t2 fs-12">${s.time}–${s.end}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td>
+        <div class="flex-c gap-4">
+          <button class="btn btn-ghost btn-xs" onclick="viewClient(${c.id})">Ver →</button>
+          ${s.status==='Programado'?`<button class="btn btn-xs" style="background:var(--accent3-light);color:var(--accent3)" onclick="cambiarEstado(${s.id},'En curso')">Iniciar</button>`:''}
+          ${s.status==='En curso'?`<button class="btn btn-xs" style="background:var(--accent2-light);color:var(--accent2)" onclick="cambiarEstado(${s.id},'Completado')">Completar</button>`:''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Sin servicios hoy</td></tr>';
+
+  const upcoming = services.filter(s => s.date > hoy && s.date > '2026-02-23').slice(0,5);
+  const eu = document.getElementById('dash-upcoming');
+  if (eu) eu.innerHTML = upcoming.map(s => {
+    const c=gc(s.clientId), w=gw(s.workerId); if(!c||!w) return '';
+    const d = new Date(s.date+'T12:00:00').toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'});
+    return `<tr><td class="fw-6 fs-12">${d}</td><td class="fw-6 fs-13">${c.name}</td><td class="t2 fs-12">${s.service}</td><td><div class="flex-c gap-6"><div class="av av-sm" style="background:${w.color}">${w.initials}</div><span class="fs-12">${w.name.split(' ')[0]}</span></div></td><td>${statusBadge(s.status)}</td></tr>`;
+  }).join('');
+
+  const eo = document.getElementById('dash-occupation');
+  if (eo) eo.innerHTML = workers.map(w => {
+    const h=computeWeekHours(w); const col=h.extra>0?'var(--accent4)':h.occ>85?'var(--accent3)':'var(--accent2)';
+    return `<div class="comm-row"><div class="av av-sm" style="background:${w.color}">${w.initials}</div><div style="flex:1"><div class="flex-bc mb-6"><span class="fs-13 fw-6">${w.name.split(' ')[0]}</span><span class="fs-12 t2">${h.total}h${h.extra>0?` <span style="color:var(--accent4);font-weight:700">+${h.extra}h extra</span>`:''}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${Math.min(h.occ,100)}%;background:${col}"></div></div></div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AGENDA
+// ═══════════════════════════════════════════════════════════════
+let agendaDate = new Date('2026-02-23T12:00:00');
+const TIMES = ['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+const SEV_COLORS = ['sev-blue','sev-teal','sev-amber','sev-red','sev-blue','sev-teal','sev-amber'];
+
+function renderAgenda() {
+  const ds = agendaDate.toISOString().split('T')[0];
+  const lbl = document.getElementById('agenda-date-lbl');
+  if(lbl) lbl.textContent = agendaDate.toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).replace(/^\w/,c=>c.toUpperCase());
+  const daySvcs = services.filter(s=>s.date===ds);
+  const tbl = document.getElementById('sched-table'); if(!tbl) return;
+  const wHead = workers.map(w=>`<th><div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div class="av av-sm" style="background:${w.color};width:30px;height:30px;font-size:11px">${w.initials}</div><div style="font-size:10px">${w.name.split(' ')[0]}</div></div></th>`).join('');
+  let html = `<thead><tr><th>Hora</th>${wHead}</tr></thead><tbody>`;
+  TIMES.forEach(t => {
+    html += `<tr><td class="time-col">${t}</td>`;
+    workers.forEach((w,i) => {
+      const svc = daySvcs.find(s=>s.workerId===w.id&&s.time?.startsWith(t.slice(0,2)));
+      html += `<td>${svc&&gc(svc.clientId)?`<div class="sched-event ${SEV_COLORS[i%SEV_COLORS.length]}"><div class="sev-name">${gc(svc.clientId).name.split(' ')[0]}</div><div class="sev-time">${svc.time}–${svc.end}</div></div>`:''}</td>`;
+    });
+    html += '</tr>';
+  });
+  tbl.innerHTML = html+'</tbody>';
+}
+function shiftDay(n, today=false) { if(today) agendaDate=new Date('2026-02-23T12:00:00'); else agendaDate.setDate(agendaDate.getDate()+n); renderAgenda(); }
+
+// ═══════════════════════════════════════════════════════════════
+// CALENDARIO
+// ═══════════════════════════════════════════════════════════════
+let calYear=2026, calMonth=1, selectedDay=null;
+function renderCalendar() {
+  const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const lbl=document.getElementById('cal-month-lbl'); if(lbl) lbl.textContent=`${months[calMonth]} ${calYear}`;
+  const first=new Date(calYear,calMonth,1).getDay(), total=new Date(calYear,calMonth+1,0).getDate(), prev=new Date(calYear,calMonth,0).getDate();
+  const grid=document.getElementById('cal-grid'); if(!grid) return;
+  let html=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(l=>`<div class="cal-day-lbl">${l}</div>`).join('');
+  for(let i=0;i<first;i++) html+=`<div class="cal-day other-month"><div class="cdn">${prev-first+1+i}</div></div>`;
+  for(let d=1;d<=total;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const svc=services.filter(s=>s.date===ds);
+    const isToday=(ds===new Date().toISOString().split('T')[0]||ds==='2026-02-23');
+    const evHtml=svc.slice(0,2).map((s,i)=>{ const c=gc(s.clientId); if(!c) return ''; const cols=['#dbeafe','#d1fae5','#fef3c7'],tc=['#1e40af','#065f46','#92400e']; return `<div class="cal-ev" style="background:${cols[i]};color:${tc[i]}">${c.name.split(' ')[0]}</div>`; }).join('')+(svc.length>2?`<div style="font-size:10px;color:var(--text3);padding:2px 4px">+${svc.length-2} más</div>`:'');
+    html+=`<div class="cal-day${isToday?' today':''}${ds===selectedDay?' selected':''}" onclick="selectCalDay('${ds}')"><div class="cdn">${d}</div>${evHtml}</div>`;
+  }
+  grid.innerHTML=html;
+  const cf=document.getElementById('cal-filters');
+  if(cf) cf.innerHTML=workers.map(w=>`<div class="chip active" style="border-color:${w.color};color:${w.color}">${w.initials} ${w.name.split(' ')[0]}</div>`).join('');
+}
+function selectCalDay(ds) {
+  selectedDay=ds; renderCalendar();
+  const svc=services.filter(s=>s.date===ds);
+  const el=document.getElementById('cal-day-detail'); if(!el) return;
+  const dLabel=new Date(ds+'T12:00:00').toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+  if(!svc.length){ el.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><div>${dLabel}<br>Sin servicios</div></div>`; return; }
+  el.innerHTML=`<div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">${dLabel}</div>`+
+    svc.map(s=>{ const c=gc(s.clientId),w=gw(s.workerId); if(!c||!w) return '';
+      return `<div class="notif-item"><div class="notif-dot" style="background:${w.color}"></div><div class="notif-body"><div class="notif-text"><strong>${c.name}</strong><br>${s.time}–${s.end} · ${w.name}</div><div class="notif-time">${statusBadge(s.status)}</div></div></div>`;
+    }).join('');
+}
+function shiftMonth(n){ calMonth+=n; if(calMonth<0){calMonth=11;calYear--;} if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+function goTodayM(){ calMonth=new Date().getMonth(); calYear=new Date().getFullYear(); renderCalendar(); }
+
+// ═══════════════════════════════════════════════════════════════
+// CLIENTES
+// ═══════════════════════════════════════════════════════════════
+let segFilter='all';
+function setSeg(s,el){ segFilter=s; document.querySelectorAll('#seg-chips .chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderClients(); }
+function renderClients() {
+  const q=(document.getElementById('cli-search')?.value||'').toLowerCase();
+  const list=clients.filter(c=>(segFilter==='all'||c.segment===segFilter)&&(!q||c.name.toLowerCase().includes(q)));
+  const tb=document.getElementById('clients-tbody'); if(!tb) return;
+  tb.innerHTML=list.map(c=>{ const p=gp(c.planId);
+    return `<tr><td><div class="flex-c gap-8"><div class="av av-sm" style="background:${COLORS[c.id%COLORS.length]};border-radius:7px">${c.name.slice(0,2)}</div><div><div class="fw-6 fs-13">${c.name}</div><div class="t3 fs-12">${c.phone||''}</div></div></div></td><td>${segBadge(c.segment)}</td><td class="t2 fs-12">${p?.name||'—'}</td><td>${prog(c.used,p?.total||0)}</td><td class="t2 fs-12">${c.next||'—'}</td><td>${statusBadge(c.status)}</td><td><button class="btn btn-ghost btn-xs" onclick="viewClient(${c.id})">Ver ficha →</button></td></tr>`;
+  }).join('');
+}
+function showClientsListView(){ document.getElementById('clients-list').style.display='block'; document.getElementById('client-profile').style.display='none'; renderClients(); }
+function viewClient(id) {
+  const c=clients.find(x=>x.id===id); if(!c) return;
+  const w=gw(c.workerId), p=gp(c.planId), cSvcs=services.filter(s=>s.clientId===id);
+  if(currentPage!=='clientes') go('clientes',null);
+  pushBC(c.name);
+  document.getElementById('clients-list').style.display='none';
+  const prof=document.getElementById('client-profile'); prof.style.display='block';
+  const completed=cSvcs.filter(s=>s.status==='Completado').length, programmed=cSvcs.filter(s=>s.status==='Programado').length, cancelled=cSvcs.filter(s=>s.status==='Cancelado').length;
+  prof.innerHTML=`
+    <button class="btn-back" onclick="showClientsListView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg> Volver a Clientes</button>
+    <div class="card card-p mb-18"><div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap">
+      <div class="av av-xl" style="background:${COLORS[c.id%COLORS.length]};border-radius:14px">${c.name.slice(0,2)}</div>
+      <div style="flex:1;min-width:200px"><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin-bottom:6px">${c.name}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text2)"><span>🏢 ${c.type}</span><span>📄 ${c.nit||'—'}</span><span>📧 ${c.email||'—'}</span><span>📱 ${c.phone||'—'}</span><span>📍 ${c.address||'—'}</span><span>📅 Desde ${c.since||'—'}</span></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${segBadge(c.segment)}<button class="btn btn-primary btn-sm" onclick="openModal('m-new-service')">+ Agendar</button></div>
+    </div></div>
+    <div class="activity-bar mb-18">
+      <div class="act-cell"><div class="act-val" style="color:var(--accent)">${cSvcs.length}</div><div class="act-lbl">Total</div></div>
+      <div class="act-cell"><div class="act-val" style="color:var(--accent2)">${completed}</div><div class="act-lbl">Completadas</div></div>
+      <div class="act-cell"><div class="act-val">${programmed}</div><div class="act-lbl">Programadas</div></div>
+      <div class="act-cell"><div class="act-val" style="color:var(--accent4)">${cancelled}</div><div class="act-lbl">Canceladas</div></div>
+      <div class="act-cell"><div class="act-val">${c.used}</div><div class="act-lbl">Usados</div></div>
+      <div class="act-cell"><div class="act-val" style="color:var(--accent2)">${p?p.total-c.used:0}</div><div class="act-lbl">Disponibles</div></div>
+    </div>
+    <div class="sidebar-layout">
+      <div>
+        <div class="tabs"><div class="tab active" onclick="switchTab(this,'ct-hist')">Historial</div><div class="tab" onclick="switchTab(this,'ct-notas')">Notas</div></div>
+        <div id="ct-hist" class="tab-pane active"><div class="card"><div class="tbl-wrap"><table>
+          <thead><tr><th>Fecha</th><th>Servicio</th><th>Trabajadora</th><th>Estado</th><th>Acción</th></tr></thead>
+          <tbody>${cSvcs.length?cSvcs.map(s=>{ const sw=gw(s.workerId); const d=new Date(s.date+'T12:00:00').toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'});
+            return `<tr><td><div class="fw-6 fs-13">${d}</div><div class="t3 fs-12">${s.time}–${s.end}</div></td><td class="t2 fs-12">${s.service}</td><td><div class="flex-c gap-6"><div class="av av-sm" style="background:${sw?.color}">${sw?.initials}</div><span class="fs-12">${sw?.name}</span></div></td><td>${statusBadge(s.status)}</td><td>${s.status==='En curso'?`<button class="btn btn-xs b-teal" onclick="cambiarEstado(${s.id},'Completado')">✓</button>`:s.status==='Programado'?`<button class="btn btn-xs b-amber" onclick="cambiarEstado(${s.id},'En curso')">▶</button>`:''}</td></tr>`;
+          }).join(''):`<tr><td colspan="5"><div class="empty">Sin servicios</div></td></tr>`}</tbody>
+        </table></div></div></div>
+        <div id="ct-notas" class="tab-pane"><div class="card card-p">
+          <div class="form-group"><div class="form-label">Notas internas</div><textarea class="form-textarea" id="nota-cliente-${c.id}" style="min-height:120px">${c.notes||''}</textarea></div>
+          <button class="btn btn-primary btn-sm" onclick="guardarNotaCliente(${c.id})">Guardar nota</button>
+        </div></div>
+      </div>
+      <div>
+        <div class="card card-p mb-18"><div class="card-header"><div class="card-title">Plan Contratado</div></div>
+          ${p?`<div class="plan-box"><div class="plan-name">${p.name}</div><div class="plan-meta">${p.total} servicios · ${p.hours}h c/u · ${p.freq}</div>${prog(c.used,p.total)}<div class="t3 fs-12 mt-6">${p.total-c.used} restantes</div></div>`:'<div class="t3 fs-13">Sin plan activo</div>'}
+        </div>
+        <div class="card card-p"><div class="card-header"><div class="card-title">Trabajadora Habitual</div></div>
+          ${w?`<div class="flex-c gap-12" onclick="viewWorker(${w.id})" style="cursor:pointer;padding:6px;border-radius:10px" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+            <div class="av av-lg" style="background:${w.color}">${w.initials}</div>
+            <div><div class="fw-7 fs-13">${w.name}</div><div class="t3 fs-12 mt-6">${w.shift}</div><div class="t3 fs-12">Zona ${w.zone}</div></div>
+          </div>`:'<div class="t3 fs-13">Sin trabajadora asignada</div>'}
+        </div>
+      </div>
+    </div>`;
+}
+function switchTab(el,paneId) {
+  ['ct-hist','ct-notas','wt-agenda','wt-horas','wt-notas'].forEach(id=>{ const e=document.getElementById(id); if(e) e.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const target=document.getElementById(paneId); if(target) target.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TRABAJADORAS
+// ═══════════════════════════════════════════════════════════════
+function renderWorkers() {
+  const grid=document.getElementById('workers-grid'); if(!grid) return;
+  grid.innerHTML=workers.map(w=>{ const h=computeWeekHours(w); const col=h.extra>0?'var(--accent4)':h.occ>85?'var(--accent3)':'var(--accent2)';
+    return `<div class="worker-card" onclick="viewWorker(${w.id})">
+      <div class="wc-top" style="background:${w.color}"></div>
+      <div class="wc-body">
+        <div class="wc-head"><div class="flex-c gap-10"><div class="av av-md" style="background:${w.color}">${w.initials}</div><div><div class="fw-7 fs-13">${w.name}</div><div class="t3 fs-12 mt-6">${w.shift}</div></div></div>${statusBadge(w.status)}</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">${radialGauge(h.occ,w.color,'Ocup.')}<div style="flex:1">
+          <div class="flex-bc mb-6"><span class="t3 fs-12">Horas semana</span><span class="fw-7 fs-13">${h.total}h</span></div>
+          <div class="flex-bc mb-6"><span class="t3 fs-12">Ordinarias</span><span class="fs-12">${h.regularHours}h</span></div>
+          <div class="flex-bc"><span class="t3 fs-12">Extras</span><span class="fs-12 fw-6" style="color:${h.extra>0?'var(--accent4)':'var(--text3)'}">${h.extra}h</span></div>
+        </div></div>
+        ${h.extra>0?`<div class="hour-alert danger" style="font-size:11px;padding:8px 10px">⚠️ ${h.extra}h extra esta semana</div>`:''}
+        <div class="flex-c gap-6 mt-10">
+          <button class="btn btn-ghost btn-xs" style="flex:1;justify-content:center" onclick="event.stopPropagation();viewWorker(${w.id})">Ver perfil</button>
+          <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();go('agenda',null)">Agenda</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function showWorkersListView(){ document.getElementById('workers-list').style.display='block'; document.getElementById('worker-profile').style.display='none'; renderWorkers(); }
+function viewWorker(id) {
+  const w=workers.find(x=>x.id===id); if(!w) return;
+  const h=computeWeekHours(w), alert=hoursAlert(h), wSvcs=services.filter(s=>s.workerId===id);
+  if(currentPage!=='trabajadoras') go('trabajadoras',null);
+  pushBC(w.name);
+  document.getElementById('workers-list').style.display='none';
+  const prof=document.getElementById('worker-profile'); prof.style.display='block';
+  const weekDays=[{ds:'2026-02-23',label:'Lun'},{ds:'2026-02-24',label:'Mar'},{ds:'2026-02-25',label:'Mié'},{ds:'2026-02-26',label:'Jue'},{ds:'2026-02-27',label:'Vie'},{ds:'2026-02-28',label:'Sáb'},{ds:'2026-03-01',label:'Dom'}];
+  const weekGrid=weekDays.map(d=>{ const e=w.schedule?.[d.ds]||{hours:0}; const cls=e.hours===0?'':isHoliday(d.ds)?'holiday':isSunday(d.ds)?'sunday':'work'; return `<div class="week-day ${cls}"><div class="week-day-name">${d.label}</div><div class="week-day-hours">${e.hours}h</div></div>`; }).join('');
+  prof.innerHTML=`
+    <button class="btn-back" onclick="showWorkersListView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg> Volver</button>
+    <div class="card card-p mb-18"><div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap">
+      <div class="av av-xl" style="background:${w.color}">${w.initials}</div>
+      <div style="flex:1;min-width:200px"><div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin-bottom:6px">${w.name}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text2)"><span>📱 ${w.phone}</span><span>📍 Zona ${w.zone}</span><span>🕐 ${w.shift}</span><span>💰 Comisión ${w.commission}%</span></div>
+      </div>
+      <div style="display:flex;gap:8px">${statusBadge(w.status)}</div>
+    </div></div>
+    <div class="grid-2 mb-18">
+      <div class="card card-p">
+        <div class="card-header"><div><div class="card-title">Control de Horas</div><div class="card-sub">44h = 100% legal (Colombia)</div></div>${radialGauge(h.occ,w.color,'Ocup.')}</div>
+        <div class="hour-alert ${alert.type}" style="margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">${alert.type==='ok'?'<polyline points="20,6 9,17 4,12"/>':'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'}</svg>${alert.msg}</div>
+        <div class="hours-grid">
+          <div class="hour-chip success"><div class="hc-val">${h.regularHours}h</div><div class="hc-label">Ordinarias</div></div>
+          <div class="hour-chip ${h.extra>0?'danger':''}"><div class="hc-val">${h.extra}h</div><div class="hc-label">Extra${h.extra>0?' ⚠️':''}</div></div>
+          <div class="hour-chip ${h.sunday>0?'warning':''}"><div class="hc-val">${h.sunday}h</div><div class="hc-label">Dominical</div></div>
+          <div class="hour-chip ${h.holiday>0?'warning':''}"><div class="hc-val">${h.holiday}h</div><div class="hc-label">Festivo</div></div>
+          <div class="hour-chip"><div class="hc-val">${h.total}h</div><div class="hc-label">Total semana</div></div>
+          <div class="hour-chip ${h.extra>0?'danger':'success'}"><div class="hc-val">${h.occ}%</div><div class="hc-label">Ocupación</div></div>
+        </div>
+      </div>
+      <div class="card card-p">
+        <div class="card-header"><div class="card-title">Distribución Semanal</div></div>
+        <div class="week-row">${weekGrid}</div>
+        <hr class="divider">
+        <div style="position:relative;background:var(--bg3);border-radius:8px;height:28px;overflow:hidden">
+          <div style="height:100%;width:${Math.min(h.regularHours/44*100,100)}%;background:var(--accent2);border-radius:8px 0 0 8px"></div>
+          ${h.extra>0?`<div style="position:absolute;top:0;right:0;height:100%;width:${Math.min(h.extra/44*100,30)}%;background:var(--accent4);opacity:.8"></div>`:''}
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3)">${h.total}h / 44h</div>
+        </div>
+      </div>
+    </div>
+    <div class="tabs"><div class="tab active" onclick="switchTab(this,'wt-agenda')">Servicios</div><div class="tab" onclick="switchTab(this,'wt-notas')">Notas</div></div>
+    <div id="wt-agenda" class="tab-pane active"><div class="card"><div class="tbl-wrap"><table>
+      <thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Horario</th><th>Estado</th></tr></thead>
+      <tbody>${wSvcs.length?wSvcs.map(s=>{ const c=gc(s.clientId); const d=new Date(s.date+'T12:00:00').toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'}); return `<tr><td>${d}</td><td class="fw-6 fs-13">${c?.name||'—'}</td><td class="t2 fs-12">${s.service}</td><td class="t2 fs-12">${s.time}–${s.end}</td><td>${statusBadge(s.status)}</td></tr>`; }).join(''):`<tr><td colspan="5"><div class="empty">Sin servicios</div></td></tr>`}</tbody>
+    </table></div></div></div>
+    <div id="wt-notas" class="tab-pane"><div class="card card-p">
+      <div class="form-group"><div class="form-label">Notas internas</div><textarea class="form-textarea" id="nota-worker-${w.id}" style="min-height:120px">${w.notes||''}</textarea></div>
+      <button class="btn btn-primary btn-sm" onclick="guardarNotaTrabajadora(${w.id})">Guardar</button>
+    </div></div>`;
+}
+async function guardarNotaTrabajadora(id) {
+  const val=document.getElementById(`nota-worker-${id}`)?.value;
+  await sb.from('trabajadoras').update({notes:val}).eq('id',id);
+  const w=workers.find(x=>x.id===id); if(w) w.notes=val;
+  toast('Nota guardada ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PLANES
+// ═══════════════════════════════════════════════════════════════
+function renderPlans() {
+  const grid=document.getElementById('plans-grid'); if(!grid) return;
+  grid.innerHTML=plans.map((p,i)=>{ const active=clients.filter(c=>c.planId===p.id).length;
+    return `<div class="card" style="border-top:4px solid ${COLORS[i%COLORS.length]};overflow:hidden"><div class="wc-body">
+      <div class="flex-bc mb-14"><div style="font-family:'Fraunces',serif;font-size:17px;font-weight:700">${p.name}</div><div style="font-size:19px;font-weight:800;color:${COLORS[i%COLORS.length]}">${p.price}</div></div>
+      <div class="t2 fs-12 mb-6">📦 ${p.total} servicios de ${p.hours} horas</div>
+      <div class="t2 fs-12 mb-6">🔄 ${p.freq}</div>
+      <div class="t2 fs-12 mb-14">👥 ${active} cliente${active!==1?'s':''} activo${active!==1?'s':''}</div>
+      <div class="flex-c gap-6"><button class="btn btn-ghost btn-xs" style="flex:1;justify-content:center">Editar</button><button class="btn btn-danger btn-xs" onclick="eliminarPlan(${p.id})">Eliminar</button></div>
+    </div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPORTES
+// ═══════════════════════════════════════════════════════════════
+function renderProductivity() {
+  const el=document.getElementById('productivity-list'); if(!el) return;
+  el.innerHTML=workers.map(w=>{ const pct=Math.round(w.services/22*100);
+    return `<div class="comm-row"><div class="av av-sm" style="background:${w.color}">${w.initials}</div><div style="flex:1"><div class="flex-bc mb-6"><span class="fw-6 fs-13">${w.name.split(' ')[0]}</span><span class="t2 fs-12">${w.services} svcs</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${w.color}"></div></div></div></div>`;
+  }).join('');
+}
+function renderHoursTable() {
+  const el=document.getElementById('hours-table'); if(!el) return;
+  el.innerHTML=workers.map(w=>{ const h=computeWeekHours(w); const col=h.extra>0?'var(--accent4)':h.occ>85?'var(--accent3)':'var(--accent2)'; const alertHtml=h.extra>0?badge('⚠️ '+h.extra+'h EXTRA','b-red'):h.occ>85?badge('🔶 ALTA','b-amber'):badge('✅ Normal','b-teal');
+    return `<tr><td><div class="flex-c gap-8"><div class="av av-sm" style="background:${w.color}">${w.initials}</div><div><div class="fw-6 fs-13">${w.name}</div><div class="t3 fs-12">${w.shift}</div></div></div></td><td><div class="fw-7 fs-13">${h.regularHours}h</div><div class="t3 fs-12">de 44h</div></td><td style="color:${h.extra>0?'var(--accent4)':'var(--text3)'};font-weight:700">${h.extra}h</td><td style="color:${(h.sunday+h.holiday)>0?'var(--accent3)':'var(--text3)'}">${h.sunday+h.holiday}h</td><td><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${Math.min(h.occ,100)}%;background:${col}"></div></div><span class="prog-label fw-7">${h.occ}%</span></div></td><td>${alertHtml}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMISIONES
+// ═══════════════════════════════════════════════════════════════
+function renderCommissions() {
+  const el=document.getElementById('commissions-list'); if(!el) return;
+  el.innerHTML=workers.map(w=>{ const h=computeWeekHours(w); const base=Math.round(w.services*120000*w.commission/100); const ext=Math.round(h.extra*15000*0.25); const dom=Math.round(h.sunday*15000*0.75); const bonus=w.services>=20?150000:0; const total=base+ext+dom+bonus;
+    return `<div class="comm-row"><div class="av av-sm" style="background:${w.color}">${w.initials}</div><div style="flex:1"><div class="flex-bc"><span class="fw-6 fs-13">${w.name.split(' ')[0]}</span><span class="fw-7 fs-13" style="color:var(--accent2)">$${(total/1000).toFixed(0)}K</span></div><div class="t3 fs-12 mt-6">Base $${(base/1000).toFixed(0)}K${ext>0?` + Extra $${(ext/1000).toFixed(0)}K`:''}${dom>0?` + Dom $${(dom/1000).toFixed(0)}K`:''}${bonus?` + Bono $${(bonus/1000).toFixed(0)}K`:''}</div></div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  setBanner('loading');
+  renderDashboard(); // render con datos vacíos inmediatamente
+  await loadAll();   // luego carga desde Supabase y re-renderiza
+});
+</script>
+</body>
+</html>

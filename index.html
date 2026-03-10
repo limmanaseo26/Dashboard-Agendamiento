@@ -1808,9 +1808,15 @@ const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 // Auth Guard: solo permite abrir la agenda si viene desde la web principal (sesión iniciada allí)
 (()=>{
   try{
-    const ref = document.referrer || '';
     const base = 'https://servicioslimman.com';
-    if(!ref.startsWith(base)){
+    const ref = document.referrer || '';
+    const params = new URLSearchParams(window.location.search || '');
+    const fromMainParam = params.get('from') === 'main';
+    const fromMainRef = ref.startsWith(base);
+    // Solo permitimos acceso si:
+    // - viene con el parámetro ?from=main (enlace controlado desde la web), o
+    // - el referrer es la web principal.
+    if(!fromMainParam && !fromMainRef){
       window.location.href = base;
     }
   }catch(e){

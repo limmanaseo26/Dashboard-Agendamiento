@@ -1805,16 +1805,17 @@ const SUPA_URL = 'https://lbeuwbyltygpdaiitcun.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxiZXV3YnlsdHlncGRhaWl0Y3VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Nzc0MTUsImV4cCI6MjA4NzQ1MzQxNX0.sm4drrPrAJhZZmAy9Yr0IiVeA9zj2OZdOgAx-KtdqvI';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// Auth Guard: si no hay sesión activa en Supabase, redirige fuera de la agenda
-(async ()=>{
+// Auth Guard: solo permite abrir la agenda si viene desde la web principal (sesión iniciada allí)
+(()=>{
   try{
-    const {data,error} = await sb.auth.getSession();
-    if(error || !data || !data.session){
-      window.location.href='https://servicioslimman.com';
+    const ref = document.referrer || '';
+    const base = 'https://servicioslimman.com';
+    if(!ref.startsWith(base)){
+      window.location.href = base;
     }
   }catch(e){
-    console.error('Auth guard Supabase', e);
-    window.location.href='https://servicioslimman.com';
+    console.error('Auth guard (referrer)', e);
+    window.location.href = 'https://servicioslimman.com';
   }
 })();
 
